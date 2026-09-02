@@ -25,8 +25,6 @@ import {
 import {
   Sparkles,
   Swords,
-  Flame,
-  Dices,
   SlidersHorizontal,
   Shield,
   RotateCcw,
@@ -51,6 +49,7 @@ export default function HomePage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [matchups, setMatchups] = useState<MatchupResult[]>([]);
   const [metaRivalries, setMetaRivalries] = useState<MatchupResult[]>([]);
+  const [currentDerbyIndex, setCurrentDerbyIndex] = useState<number>(0);
   const [favorites, setFavorites] = useState<FavoriteMatchup[]>([]);
   const [matchLogs, setMatchLogs] = useState<MatchLog[]>([]);
   const [filterMeta, setFilterMeta] = useState<any>(null);
@@ -108,6 +107,11 @@ export default function HomePage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleNextDerby = () => {
+    if (metaRivalries.length === 0) return;
+    setCurrentDerbyIndex((prev) => (prev + 1) % metaRivalries.length);
   };
 
   const handleOpenLogModal = (team1Id: number, team2Id: number) => {
@@ -279,20 +283,35 @@ export default function HomePage() {
         {/* --- TAB 3: DERBY HUB --- */}
         {activeTab === 'derby' && (
           <div>
-            <div className="mb-6">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
-                Historic Rivalry Clashes
-              </span>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                Derby Classics
-              </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800">
+              <div>
+                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block mb-1">
+                  Historic Rivalry Clashes {metaRivalries.length > 0 ? `• Derby ${currentDerbyIndex + 1} of ${metaRivalries.length}` : ''}
+                </span>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  Derby Classics
+                </h2>
+                <p className="text-zinc-400 text-xs mt-1">
+                  Discover iconic football rivalries and classic derby clashes.
+                </p>
+              </div>
+
+              <button
+                onClick={handleNextDerby}
+                className="px-4 py-2.5 rounded-xl bg-zinc-100 text-zinc-950 font-medium text-xs hover:bg-zinc-200 transition-colors flex items-center justify-center gap-2 shrink-0 shadow-sm"
+              >
+                <RotateCcw className="w-4 h-4" />
+                Generate Another Derby
+              </button>
             </div>
 
-            <div className="space-y-6">
-              {metaRivalries.map((m, idx) => (
-                <MatchupCard key={idx} matchup={m} onOpenLogModal={handleOpenLogModal} />
-              ))}
-            </div>
+            {metaRivalries.length > 0 && metaRivalries[currentDerbyIndex] ? (
+              <MatchupCard matchup={metaRivalries[currentDerbyIndex]} onOpenLogModal={handleOpenLogModal} />
+            ) : (
+              <div className="bg-zinc-900/60 border border-zinc-800 p-10 rounded-2xl text-center text-xs text-zinc-400">
+                Loading derby matchups...
+              </div>
+            )}
           </div>
         )}
 
