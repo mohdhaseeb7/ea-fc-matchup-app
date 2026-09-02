@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
-import { User, Mail, Lock, X, LogIn } from 'lucide-react';
+import { User, Mail, Lock, X, LogIn, AlertCircle } from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ea-fc-matchup-backend.onrender.com';
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isRegister, setIsRegister] = useState(false);
@@ -15,30 +17,56 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage(null);
 
     try {
+      if (isRegister) {
+        // Step 1: Register user on backend API
+        const regRes = await fetch(`${BACKEND_URL}/api/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, name: name || email.split('@')[0] }),
+        });
+
+        if (!regRes.ok) {
+          const errData = await regRes.json().catch(() => ({}));
+          throw new Error(errData.message || 'Account registration failed. Please try again.');
+        }
+      }
+
+      // Step 2: Sign in with credentials
       const res = await signIn('credentials', {
         email,
         password,
         redirect: false,
       });
+
       if (res?.ok) {
         onClose();
+      } else {
+        setErrorMessage(res?.error || 'Invalid email or password.');
       }
-    } catch (err) {
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Authentication error.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    signIn('google');
+  const handleGoogleSignIn = async () => {
+    setErrorMessage(null);
+    try {
+      await signIn('google', { callbackUrl: '/' });
+    } catch (err: any) {
+      setErrorMessage('Google Sign-In requires GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET. Use Email Sign Up below for instant access!');
+    }
   };
 
   return (
@@ -62,6 +90,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             Sign in to save favorite matchups & track H2H stats
           </p>
         </div>
+
+        {errorMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2">
+            <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         <button
           onClick={handleGoogleSignIn}
@@ -146,7 +181,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-zinc-100 text-zinc-950 font-medium text-xs hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 mt-2"
+            className="w-full py-2.5 rounded-xl bg-zinc-100 text-zinc-950 font-medium text-xs hover:bg-zinc-200 transition-colors flex items-center justify-center gap-1.5 mt-2 disabled:opacity-50"
           >
             <LogIn className="w-3.5 h-3.5" />
             {loading ? 'Processing...' : isRegister ? 'Sign Up' : 'Sign In'}
@@ -155,7 +190,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
         <div className="mt-4 text-center">
           <button
-            onClick={() => setIsRegister(!isRegister)}
+            onClick={() => {
+              setIsRegister(!isRegister);
+              setErrorMessage(null);
+            }}
             className="text-xs text-zinc-400 hover:text-zinc-200 underline font-medium"
           >
             {isRegister ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}

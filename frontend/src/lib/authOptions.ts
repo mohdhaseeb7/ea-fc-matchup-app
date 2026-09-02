@@ -2,6 +2,8 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ea-fc-matchup-backend.onrender.com';
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -18,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000'}/api/auth/login`, {
+          const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -36,9 +38,11 @@ export const authOptions: NextAuthOptions = {
               image: user.avatarUrl,
             };
           }
-        } catch (e) {}
+        } catch (e) {
+          console.error('Auth login error:', e);
+        }
 
-        // Fallback for fast demo signup/login
+        // Fallback demo user for instant login
         return {
           id: '1',
           name: credentials.email.split('@')[0] || 'FC Player',
