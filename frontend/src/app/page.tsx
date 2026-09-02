@@ -161,13 +161,11 @@ export default function HomePage() {
               </div>
 
               {/* Mode Selection Pills */}
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-5">
                 {[
                   { id: 'balanced', label: 'Balanced (5★)', icon: Shield },
-                  { id: 'rivalry', label: 'Derby Rivals', icon: Flame },
                   { id: 'playstyle_clash', label: 'Playstyle Clash', icon: Zap },
                   { id: 'underdog', label: 'David vs Goliath', icon: Swords },
-                  { id: 'random_wheel', label: 'Random Spin', icon: Dices },
                 ].map((m) => {
                   const Icon = m.icon;
                   const active = mode === m.id;
