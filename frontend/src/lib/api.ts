@@ -1,6 +1,6 @@
 import { Team, MatchupResult, GenerateMatchupParams, FavoriteMatchup, MatchLog } from './types';
 
-const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+const API_BASE = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://ea-fc-matchup-backend.onrender.com';
 
 export async function fetchFilterMetadata() {
   try {
