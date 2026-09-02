@@ -65,7 +65,7 @@ export default function MatchupCard({ matchup, onOpenLogModal }: MatchupCardProp
             VS
           </div>
           <span className="text-[11px] font-semibold text-zinc-500 mt-2 uppercase tracking-wider">
-            $\Delta$ {ratingDelta} PTS
+            Δ {ratingDelta} PTS
           </span>
         </div>
 
