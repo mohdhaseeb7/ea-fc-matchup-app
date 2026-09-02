@@ -435,7 +435,7 @@ export default function HomePage() {
       </main>
 
       <footer className="w-full border-t border-zinc-800/60 py-5 text-center text-xs text-zinc-500">
-        <p>EA FC Matchup Discovery — Minimal modern design</p>
+        <p>EA FC Matchup Discovery</p>
       </footer>
 
       {/* Modals */}
