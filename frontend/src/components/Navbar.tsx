@@ -136,17 +136,19 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuthModal }: Nav
         </div>
       </div>
 
-      {/* Mobile Side Drawer Overlay & Panel */}
+      {/* Mobile Side Drawer Overlay */}
       {isMobileMenuOpen && (
         <div
           onClick={() => setIsMobileMenuOpen(false)}
-          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm md:hidden transition-opacity"
+          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md md:hidden transition-opacity"
           aria-hidden="true"
         />
       )}
 
+      {/* Mobile Side Drawer Panel (Fully Opaque) */}
       <div
-        className={`fixed top-0 right-0 bottom-0 z-50 w-72 bg-zinc-950 border-l border-zinc-800/90 p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
+        style={{ backgroundColor: '#09090b' }}
+        className={`fixed top-0 right-0 bottom-0 z-[70] w-80 max-w-[85vw] bg-[#09090b] border-l border-zinc-800 p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
           isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
         }`}
       >
@@ -185,7 +187,7 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuthModal }: Nav
                   className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
                     isActive
                       ? 'bg-zinc-800 text-white font-semibold shadow-sm border border-zinc-700/60'
-                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/80'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
                   }`}
                 >
                   <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
