@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSession, signOut } from 'next-auth/react';
 import { Shield, Sparkles, Dices, Flame, Heart, History, User, LogOut, Menu, X } from 'lucide-react';
 
@@ -13,6 +14,11 @@ interface NavbarProps {
 export default function Navbar({ activeTab, setActiveTab, onOpenAuthModal }: NavbarProps) {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Prevent background scroll when mobile side drawer is open
   useEffect(() => {
@@ -55,190 +61,195 @@ export default function Navbar({ activeTab, setActiveTab, onOpenAuthModal }: Nav
   ];
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-zinc-950/90 border-b border-zinc-800/80 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        {/* Brand / Logo */}
-        <div 
-          onClick={() => handleTabSelect('generator')} 
-          className="flex items-center gap-2.5 cursor-pointer"
-        >
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center">
-            <Shield className="w-4 h-4 text-zinc-100" />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-base tracking-tight text-white">
-              EA FC Matchup
-            </span>
-            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">
-              v27
-            </span>
-          </div>
-        </div>
-
-        {/* Desktop Navigation Tabs */}
-        <nav className="hidden md:flex items-center gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  isActive
-                    ? 'bg-zinc-800 text-white shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {item.label}
-              </button>
-            );
-          })}
-        </nav>
-
-        {/* Right Section: Desktop Auth & Mobile Menu Button */}
-        <div className="flex items-center gap-2">
-          {/* User Auth Section */}
-          <div className="hidden sm:flex items-center gap-2">
-            {session?.user ? (
-              <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-xl">
-                <span className="text-xs font-medium text-zinc-300 truncate max-w-[110px]">
-                  {session.user.name || session.user.email}
-                </span>
-                <button
-                  onClick={() => signOut()}
-                  title="Sign Out"
-                  className="p-1 rounded-lg text-zinc-400 hover:text-zinc-200 transition-colors"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={onOpenAuthModal}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 text-zinc-950 font-medium text-xs hover:bg-zinc-200 transition-colors"
-              >
-                <User className="w-3.5 h-3.5" />
-                Sign In
-              </button>
-            )}
-          </div>
-
-          {/* Mobile Hamburger Toggle Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="flex md:hidden items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
-            aria-label="Toggle navigation menu"
+    <>
+      <header className="sticky top-0 z-40 w-full bg-zinc-950/90 border-b border-zinc-800/80 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          {/* Brand / Logo */}
+          <div 
+            onClick={() => handleTabSelect('generator')} 
+            className="flex items-center gap-2.5 cursor-pointer"
           >
-            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Side Drawer Overlay */}
-      {isMobileMenuOpen && (
-        <div
-          onClick={() => setIsMobileMenuOpen(false)}
-          className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md md:hidden transition-opacity"
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile Side Drawer Panel (Fully Opaque) */}
-      <div
-        style={{ backgroundColor: '#09090b' }}
-        className={`fixed top-0 right-0 bottom-0 z-[70] w-80 max-w-[85vw] bg-[#09090b] border-l border-zinc-800 p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
-      >
-        <div>
-          {/* Drawer Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center">
+              <Shield className="w-4 h-4 text-zinc-100" />
+            </div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center">
-                <Shield className="w-4 h-4 text-zinc-100" />
-              </div>
-              <span className="font-bold text-sm text-white tracking-tight">
+              <span className="font-bold text-base tracking-tight text-white">
                 EA FC Matchup
               </span>
+              <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 border border-zinc-700/50">
+                v27
+              </span>
             </div>
-            <button
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-              aria-label="Close navigation menu"
-            >
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
-          {/* Mobile Drawer Navigation Links */}
-          <nav className="py-6 flex flex-col gap-1.5">
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 px-2 mb-1">
-              Menu Navigation
-            </span>
+          {/* Desktop Navigation Tabs */}
+          <nav className="hidden md:flex items-center gap-1 bg-zinc-900/80 p-1 rounded-xl border border-zinc-800">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
               return (
                 <button
                   key={item.id}
-                  onClick={() => handleTabSelect(item.id)}
-                  className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                  onClick={() => setActiveTab(item.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     isActive
-                      ? 'bg-zinc-800 text-white font-semibold shadow-sm border border-zinc-700/60'
-                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
+                      ? 'bg-zinc-800 text-white shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
                   }`}
                 >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
+                  <Icon className="w-3.5 h-3.5" />
                   {item.label}
                 </button>
               );
             })}
           </nav>
-        </div>
 
-        {/* Drawer Footer Auth Section */}
-        <div className="border-t border-zinc-800/80 pt-4 mt-auto">
-          {session?.user ? (
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2.5 px-3 py-2 bg-zinc-900 rounded-xl border border-zinc-800">
-                <User className="w-4 h-4 text-zinc-400 shrink-0" />
-                <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-semibold text-zinc-200 truncate">
-                    {session.user.name || 'User'}
+          {/* Right Section: Desktop Auth & Mobile Menu Button */}
+          <div className="flex items-center gap-2">
+            {/* User Auth Section */}
+            <div className="hidden sm:flex items-center gap-2">
+              {session?.user ? (
+                <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 px-2.5 py-1 rounded-xl">
+                  <span className="text-xs font-medium text-zinc-300 truncate max-w-[110px]">
+                    {session.user.name || session.user.email}
                   </span>
-                  <span className="text-[10px] text-zinc-400 truncate">
-                    {session.user.email}
+                  <button
+                    onClick={() => signOut()}
+                    title="Sign Out"
+                    className="p-1 rounded-lg text-zinc-400 hover:text-zinc-200 transition-colors"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={onOpenAuthModal}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-zinc-100 text-zinc-950 font-medium text-xs hover:bg-zinc-200 transition-colors"
+                >
+                  <User className="w-3.5 h-3.5" />
+                  Sign In
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="flex md:hidden items-center justify-center p-2 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800 transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Side Drawer rendered directly into document.body via Portal to escape header stacking context */}
+      {mounted && isMobileMenuOpen && createPortal(
+        <div className="md:hidden">
+          {/* Backdrop Overlay */}
+          <div
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="fixed inset-0 z-[9998] bg-black/85 backdrop-blur-sm transition-opacity"
+            aria-hidden="true"
+          />
+
+          {/* Fully Opaque Solid Dark Drawer Panel */}
+          <div
+            style={{ backgroundColor: '#09090b', opacity: 1 }}
+            className="fixed top-0 right-0 bottom-0 z-[9999] w-80 max-w-[85vw] bg-[#09090b] border-l border-zinc-800 p-5 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out translate-x-0"
+          >
+            <div>
+              {/* Drawer Header */}
+              <div className="flex items-center justify-between border-b border-zinc-800/80 pb-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/60 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-zinc-100" />
+                  </div>
+                  <span className="font-bold text-sm text-white tracking-tight">
+                    EA FC Matchup
                   </span>
                 </div>
+                <button
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  aria-label="Close navigation menu"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={() => {
-                  setIsMobileMenuOpen(false);
-                  signOut();
-                }}
-                className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-zinc-800 transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign Out
-              </button>
+
+              {/* Mobile Drawer Navigation Links */}
+              <nav className="py-6 flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500 px-2 mb-1">
+                  Menu Navigation
+                </span>
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => handleTabSelect(item.id)}
+                      className={`flex items-center gap-3 px-3.5 py-3 rounded-xl text-sm font-medium transition-all ${
+                        isActive
+                          ? 'bg-zinc-800 text-white font-semibold shadow-sm border border-zinc-700/60'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 ${isActive ? 'text-white' : 'text-zinc-400'}`} />
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-          ) : (
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                onOpenAuthModal();
-              }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-100 text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-colors shadow-sm"
-            >
-              <User className="w-4 h-4" />
-              Sign In to Account
-            </button>
-          )}
-        </div>
-      </div>
-    </header>
+
+            {/* Drawer Footer Auth Section */}
+            <div className="border-t border-zinc-800/80 pt-4 mt-auto">
+              {session?.user ? (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-center gap-2.5 px-3 py-2 bg-zinc-900 rounded-xl border border-zinc-800">
+                    <User className="w-4 h-4 text-zinc-400 shrink-0" />
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-zinc-200 truncate">
+                        {session.user.name || 'User'}
+                      </span>
+                      <span className="text-[10px] text-zinc-400 truncate">
+                        {session.user.email}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      signOut();
+                    }}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-zinc-800 transition-colors"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenAuthModal();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-zinc-100 text-zinc-950 font-semibold text-xs hover:bg-zinc-200 transition-colors shadow-sm"
+                >
+                  <User className="w-4 h-4" />
+                  Sign In to Account
+                </button>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }
+
 
